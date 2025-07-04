@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/utils/supabase'
 import type { SurveyResponse } from '@/utils/supabase'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
@@ -17,11 +17,7 @@ export default function AdminPage() {
     avgRating: 0
   })
 
-  useEffect(() => {
-    fetchResponses()
-  }, [])
-
-  const fetchResponses = async () => {
+  const fetchResponses = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('survey_responses')
@@ -37,7 +33,11 @@ export default function AdminPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchResponses()
+  }, [fetchResponses])
 
   const calculateStats = (data: SurveyResponse[]) => {
     const bySubject: { [key: string]: number } = {}
@@ -220,7 +220,7 @@ export default function AdminPage() {
           <ResponsiveContainer width="100%" height={400}>
             <BarChart 
               data={Object.entries(stats.byAITools)
-                .sort(([,a], [,b]) => b - a)
+                .sort(([,a], [,b]) => (b as number) - (a as number))
                 .slice(0, 10)
                 .map(([tool, count]) => ({ tool, count }))}
               layout="horizontal"

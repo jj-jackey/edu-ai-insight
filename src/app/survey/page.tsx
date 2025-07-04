@@ -7,8 +7,6 @@ import { z } from 'zod'
 import { Progress } from '@radix-ui/react-progress'
 import { ChevronLeft, ChevronRight, Check } from 'lucide-react'
 import { supabase } from '@/utils/supabase'
-import type { SurveyResponse } from '@/utils/supabase'
-
 // 폼 스키마 정의
 const surveySchema = z.object({
   // 교사 정보
@@ -54,7 +52,6 @@ export default function SurveyPage() {
     handleSubmit,
     formState: { errors },
     watch,
-    setValue,
     trigger,
   } = useForm<SurveyFormData>({
     resolver: zodResolver(surveySchema),
@@ -63,7 +60,7 @@ export default function SurveyPage() {
       ai_tools_used: [],
       ai_usage_purpose: [],
       interested_ai_areas: [],
-      ai_positive_rating: 3,
+      ai_positive_rating: '3',
     },
   })
 
@@ -105,7 +102,7 @@ export default function SurveyPage() {
   const onSubmit = async (data: SurveyFormData) => {
     setIsSubmitting(true)
     try {
-      const { data: result, error } = await supabase
+      const { error } = await supabase
         .from('survey_responses')
         .insert([data])
 
@@ -466,9 +463,7 @@ export default function SurveyPage() {
                               <input
                                 type="radio"
                                 value={rating.toString()}
-                                {...register('ai_positive_rating', { 
-                                  setValueAs: (value) => parseInt(value, 10)
-                                })}
+                                {...register('ai_positive_rating')}
                                 className="w-5 h-5 text-indigo-600 bg-gray-100 border-gray-300 focus:ring-indigo-500 focus:ring-2"
                               />
                               <span className="mt-1 text-xs text-gray-600">{rating}</span>
@@ -491,14 +486,14 @@ export default function SurveyPage() {
                         {...register('support_needed')}
                         rows={5}
                         placeholder="구체적인 의견을 자유롭게 작성해주세요 (최소 10자 이상)
-                        
+
 예시:
 - 체계적인 AI 연수 프로그램
 - 실무에 바로 적용 가능한 가이드라인
 - AI 도구 사용법 실습 기회
 - 동료 교사들과의 경험 공유
 - 학교 차원의 AI 도구 지원
-- 등등..."
+- 등등"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none"
                       />
                       {errors.support_needed && (
